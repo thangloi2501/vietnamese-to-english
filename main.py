@@ -83,7 +83,6 @@ def webhook():
         translated = call_openrouter(prompt)
         if not translated:
             translated = "Sorry, couldn't translate right now."
-        print(f">>>>>> {translated}")
     except Exception as e:
         logging.exception("OpenRouter call failed")
         translated = "Sorry, translation service failed."
