@@ -71,8 +71,7 @@ def webhook():
         return "ok, not message", 200
 
     text = message.get("text")
-    chat_id = message["chat"]["id"] # 5221276422
-    #msg_id = 2066657 # message.get("message_id")
+    chat_id = message["chat"]["id"]
 
     if not text:
         # ignore non-text messages (or send a small note)
