@@ -79,7 +79,7 @@ def webhook():
         return "ok, not text", 200
 
     try:
-        prompt = f"Translate to English (like native Singaporean often uses, do not provide any explanation): {text}"
+        prompt = f"Translate to English (do not provide any explanation): {text}"
         translated = call_openrouter(prompt)
         if not translated:
             translated = "Sorry, couldn't translate right now."
