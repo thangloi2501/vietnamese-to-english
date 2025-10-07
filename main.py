@@ -2,6 +2,8 @@ import os
 import logging
 import requests
 from flask import Flask, request, jsonify
+from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -93,6 +95,17 @@ def webhook():
         logging.exception("Failed to send Telegram message")
 
     return "ok", 200
+
+def job():
+    logging.info("Job is executing....")
+
+##### setup scheduler ########
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=job, trigger="interval", minutes=1)
+scheduler.start()
+
+atexit.register(lambda: scheduler.shutdown())
+
 
 if __name__ == "__main__":
     # local dev
