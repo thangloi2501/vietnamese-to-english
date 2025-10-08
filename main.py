@@ -14,7 +14,7 @@ load_dotenv()  # will read .env in current directory
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 OPENROUTER_KEY = os.getenv("OPENROUTER_KEY")
 WEBHOOK_SECRET = os.getenv("TELEGRAM_WEBHOOK_SECRET")  # optional, recommended
-MODEL_NAME = os.getenv("MODEL_NAME", "meta-llama/llama-3.2-3b-instruct:free") #deepseek/deepseek-chat-v3.1:free
+MODEL_NAME = os.getenv("MODEL_NAME", "meta-llama/llama-3.3-70b-instruct:free") #deepseek/deepseek-chat-v3.1:free
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 if not TELEGRAM_BOT_TOKEN or not OPENROUTER_KEY:
@@ -81,7 +81,7 @@ def webhook():
         return "ok, not text", 200
 
     try:
-        prompt = f"Translate to English (do not provide any explanation): {text}"
+        prompt = f"Translate to English (concise, do not provide any explanation): {text}"
         translated = call_openrouter(prompt)
         if not translated:
             translated = "Sorry, couldn't translate right now."
