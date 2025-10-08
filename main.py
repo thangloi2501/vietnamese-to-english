@@ -100,11 +100,11 @@ def job():
     logging.info("Job is executing....")
 
 ##### setup scheduler ########
-scheduler = BackgroundScheduler()
-scheduler.add_job(func=job, trigger="interval", minutes=1)
-scheduler.start()
+# scheduler = BackgroundScheduler()
+# scheduler.add_job(func=job, trigger="interval", minutes=1)
+# scheduler.start()
 
-atexit.register(lambda: scheduler.shutdown())
+# atexit.register(lambda: scheduler.shutdown())
 
 
 if __name__ == "__main__":
