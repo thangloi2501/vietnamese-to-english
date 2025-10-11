@@ -50,10 +50,11 @@ def call_openrouter(prompt_text):
     j = r.json()
     # Robust extraction (OpenRouter uses choices[].message.content like OpenAI)
     try:
+        mode = "memoized" if previous_question != "" else "none"
         answer = j["choices"][0]["message"]["content"].strip()
         previous_question = prompt_text
         previous_answer = answer
-        logging.info(f">>> question: {previous_question}, answer: {previous_answer}")
+        logging.info(f">>> [{mode}] question: {previous_question}, answer: {previous_answer}")
         return answer
     except Exception:
         # fallbacks
