@@ -69,7 +69,7 @@ def call_openrouter(prompt_text, text):
             previous_question = text
             previous_answer = content
 
-        logging.info(f">>> [{context}] question: {text}, answer: {content}")
+        logging.info(f">>> [{context}] question: {text}, answer: {reply}")
         return content
     except Exception:
         # fallbacks
