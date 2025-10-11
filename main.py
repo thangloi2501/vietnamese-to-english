@@ -4,6 +4,7 @@ import requests
 from flask import Flask, request, jsonify
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
+import json
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -27,7 +28,7 @@ previous_answer = ""
 def index():
     return "OK", 200
 
-def call_openrouter(prompt_text):
+def call_openrouter(prompt_text, text):
     global previous_question, previous_answer
 
     messages = [
@@ -50,18 +51,39 @@ def call_openrouter(prompt_text):
     j = r.json()
     # Robust extraction (OpenRouter uses choices[].message.content like OpenAI)
     try:
-        mode = "memoized" if previous_question != "" else "none"
-        answer = j["choices"][0]["message"]["content"].strip()
-        previous_question = prompt_text
-        previous_answer = answer
-        logging.info(f">>> [{mode}] question: {previous_question}, answer: {previous_answer}")
-        return answer
+        context = f"{previous_question}:{previous_answer}" if previous_question != "" else "none"
+        reply = j["choices"][0]["message"]["content"].strip()
+
+        try:
+            result = json.loads(reply)
+            action = result["action"]
+            content = result["content"]
+        except:
+            # fallback if model doesn't follow JSON
+            action = "unknown"
+            content = None
+
+        if action == "translate":
+            clear_context()
+        else:
+            previous_question = text
+            previous_answer = content
+
+        logging.info(f">>> [{context}] question: {text}, answer: {content}")
+        return content
     except Exception:
         # fallbacks
         try:
+            clear_context()
             return j["choices"][0].get("text", "").strip()
         except Exception:
+            clear_context()
             return None
+
+def clear_context():
+    global previous_question, previous_answer
+    previous_question = ""
+    previous_answer = ""
 
 def send_telegram_message(chat_id, text, reply_to=None):
     print(f"{TELEGRAM_BOT_TOKEN}")
@@ -99,10 +121,11 @@ def webhook():
         return "ok, not text", 200
 
     try:
-        prompt = (f"If text is in Vietnamese, translate it into English (concise, do not provide any explanation)."
-                  f"If text is in English, just answer the question."
+        prompt = (f"If the text is in Vietnamese, translate it into English (concise, do not provide any explanation)."
+                  f"If the text is in English, answer the question."
+                  f"Return your result in JSON format with keys: {'action': 'translate' or 'answer', 'content': '<your output>'}."
                   f"Text: {text}")
-        translated = call_openrouter(prompt)
+        translated = call_openrouter(prompt, text)
         if not translated:
             translated = "Sorry, couldn't translate right now."
     except Exception as e:
