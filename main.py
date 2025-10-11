@@ -68,7 +68,7 @@ def call_openrouter(prompt_text, text):
             session["previous_question"] = text
             session["previous_answer"] = content
 
-        logging.info(f">>> [{context}] question: {text}, answer: {reply}")
+        logging.info(f">>> [{context}] question: {text}, answer: {content}")
         return content
     except Exception:
         # fallbacks
