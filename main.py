@@ -1,7 +1,7 @@
 import os
 import logging
 import requests
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, session
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
 import json
@@ -21,22 +21,21 @@ OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 if not TELEGRAM_BOT_TOKEN or not OPENROUTER_KEY:
     logging.warning("Missing TELEGRAM_BOT_TOKEN or OPENROUTER_KEY environment variables.")
 
-previous_question = ""
-previous_answer = ""
+if "previous_question" not in session:
+    session["previous_question"] = ""
+    session["previous_answer"] = ""
 
 @app.route("/", methods=["GET"])
 def index():
     return "OK", 200
 
 def call_openrouter(prompt_text, text):
-    global previous_question, previous_answer
-
     messages = [
         {"role": "system", "content": "You are a helpful assistant or a Vietnamese-English translator."},
     ]
-    if previous_question != "":
-        messages.append({"role": "user", "content": previous_question})
-        messages.append({"role": "assistant", "content": previous_answer})
+    if session["previous_question"] != "":
+        messages.append({"role": "user", "content": session["previous_question"]})
+        messages.append({"role": "assistant", "content": session["previous_answer"]})
     messages.append({"role": "user", "content": prompt_text})
 
     payload = {
@@ -51,7 +50,7 @@ def call_openrouter(prompt_text, text):
     j = r.json()
     # Robust extraction (OpenRouter uses choices[].message.content like OpenAI)
     try:
-        context = f"{previous_question}:{previous_answer}" if previous_question != "" else "none"
+        context = f"{session['previous_question']}:{session['previous_answer']}" if session["previous_question"] != "" else "none"
         reply = j["choices"][0]["message"]["content"].strip()
 
         try:
@@ -66,8 +65,8 @@ def call_openrouter(prompt_text, text):
         if action == "translate":
             clear_context()
         else:
-            previous_question = text
-            previous_answer = content
+            session["previous_question"] = text
+            session["previous_answer"] = content
 
         logging.info(f">>> [{context}] question: {text}, answer: {reply}")
         return content
@@ -81,9 +80,8 @@ def call_openrouter(prompt_text, text):
             return None
 
 def clear_context():
-    global previous_question, previous_answer
-    previous_question = ""
-    previous_answer = ""
+    session["previous_question"] = ""
+    session["previous_answer"] = ""
 
 def send_telegram_message(chat_id, text, reply_to=None):
     print(f"{TELEGRAM_BOT_TOKEN}")
