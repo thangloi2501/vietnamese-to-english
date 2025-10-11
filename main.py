@@ -121,10 +121,12 @@ def webhook():
         return "ok, not text", 200
 
     try:
-        prompt = (f"If the text is in Vietnamese, translate it into English (concise, do not provide any explanation)."
-                  f"If the text is in English, answer the question."
-                  f"Return your result in JSON format with keys: {'action': 'translate' or 'answer', 'content': '<your output>'}."
-                  f"Text: {text}")
+        prompt = f"""
+        If the text is in Vietnamese, translate it into English (concise, do not provide any explanation).
+        If the text is in English, answer the question.
+        Return your result in JSON format with keys: {{'action': 'translate' or 'answer', 'content': '<your output>'}}.
+        Text: {text}
+        """
         translated = call_openrouter(prompt, text)
         if not translated:
             translated = "Sorry, couldn't translate right now."
