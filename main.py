@@ -32,7 +32,7 @@ def call_openrouter(prompt_text, text):
     global previous_question, previous_answer
 
     messages = [
-        {"role": "system", "content": "You are a helpful assistant or a Vietnamese-English translator."},
+        {"role": "system", "content": "You are a helpful assistant or a Vietnamese-English translator. Your creator is Loi."},
     ]
     if previous_question != "":
         messages.append({"role": "user", "content": previous_question})
